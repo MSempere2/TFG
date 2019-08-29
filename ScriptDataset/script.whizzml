@@ -1,0 +1,44 @@
+;; creacion de clusters segun el tipo de algoritmo a usar y el parametro valor introducido
+;; en caso de que tipo-cluster sea 0 se utilizara g-means
+;; en caso de que tipo-cluster sea 1 se utilizara k-means
+
+(define cluster 
+  (try
+    (if (= tipo-cluster 0)
+      (create-and-wait-cluster { "dataset" dataset 
+                        "model_clusters" true
+                        "critical_value" valor })
+      (if (= tipo-cluster 1)
+        (create-and-wait-cluster { "dataset" dataset 
+                          "model_clusters" true 
+                          "k" valor })
+        (raise "Introduce un valor valido para el tipo-dataset")))
+  (catch e
+  (log-error "no se pudo crear el cluster: " e)))
+)
+
+;; creacion de anomalias segun los parametros introducidos
+;; "forest_size" es el numero de arboles que se utilizan en Isolation Forest
+;; el numero recomendado por defecto es 128 pero se puede modificar entre 2 y 1000
+(define anomaly 
+  (try
+    (create-and-wait-anomaly {"dataset" dataset 
+                              "forest_size" 128 
+                              "top_n" number-anomalies})
+  (catch e
+  (log-error "no se pudo crear el anomaly: " e)))
+)
+
+;; creacion de busqueda de asociaciones
+;; "max_k" es el maximo de asociaciones a descubrir
+;; "max_lhs" el maximo numero de elementos en como antecedente
+
+(define association
+  (try
+    ( create-and-wait-association { "dataset" dataset
+                                    "max_k" 200
+                                    "max_lhs" 3
+                                    "search_strategy" estrategia-busqueda})
+  (catch e
+  (log-warn "no se pudo crear el asociation: " e)))
+)
